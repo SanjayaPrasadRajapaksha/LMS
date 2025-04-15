@@ -89,7 +89,7 @@ export const assets = {
     play_icon,
     blue_tick_icon,
     lesson_icon
-}
+};
 
 export const dummyEducatorData = {
     "_id": "675ac1512100b91a6d9b8b24",
