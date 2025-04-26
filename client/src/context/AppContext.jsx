@@ -10,6 +10,7 @@ const currency = import.meta.env.VITE_CURRENCY
 const navigate = useNavigate()
 
 const [allCourses, setAllCourses] = useState([])
+const [isEducator, setIsEducator] = useState(true)
 
 //Fetch All Courses
 
@@ -34,7 +35,9 @@ useEffect(()=> {
         currency,
         allCourses,
         navigate,
-        calculateRating
+        calculateRating,
+        isEducator, 
+        setIsEducator
     }
     return (
         <AppContext.Provider value={value}>
