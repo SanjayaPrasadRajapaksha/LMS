@@ -23,7 +23,7 @@ const CourseDetails = () => {
 
   useEffect(() => {
     fetchCourseData()
-  }, [])
+  }, [allCourses])
 
   const toggleSection = (index) => {
     setOpenSections((prev) => (
@@ -115,7 +115,7 @@ const CourseDetails = () => {
           {
             playerData ?
               <YouTube videoId={playerData.videoId} opts={{ playerVars: { autoplay: 1 } }} iframeClassName='w-full aspect-video' />
-              : <img className='w-3.5' src={courseData.courseThumbnail} alt="clock icon" />
+              : <img src={courseData.courseThumbnail} alt="clock icon" />
           }
           <div className='p-5'>
             <div className='flex items-center gap-2'>
@@ -132,7 +132,7 @@ const CourseDetails = () => {
               <p className='md:text-lg text-gray-500'>{courseData.discount}% off</p>
             </div>
             <div className='flex items-center text-sm md:text-default gap-4 pt-2
-md:pt-4 text-gray-500'>
+            md:pt-4 text-gray-500'>
 
               <div className='flex items-center gap-1'>
                 <img src={assets.star} alt="star icon" />
