@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { type } from "os";
-import { ref } from "process";
+
 
 const userSchema = new mongoose.Schema({
     _id: {
