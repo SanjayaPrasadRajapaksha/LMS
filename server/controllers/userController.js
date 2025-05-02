@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
 import { getEnrolledStudentsData } from "./educatorController.js";
+import Purchase from "../models/Purchase.js";
 
 
 // Get user data
@@ -72,6 +73,7 @@ export const purchaseCourse = async (req, res) => {
             success_url: `${origin}/loading/my-enrollments`,
             cancel_url: `${origin}/`,
             line_items: line_items,
+            mode: 'payment',
             metadata: {
                 purchaseId: newPurchase._id.toString()
             }
