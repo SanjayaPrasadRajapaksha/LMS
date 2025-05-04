@@ -123,4 +123,44 @@ export const getCoursesProgress = async (req, res) => {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
+}
+
+export const addUserRating = async (req, res) => {
+    const userId = req.auth.userId;
+    const { courseId, rating } = req.body;
+
+    // Validate input
+    if (!courseId || !userId || rating < 1 || rating > 5) {
+        return res.json({ success: false, message: 'Invalid Details' });
+    }
+
+    try {
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.json({ success: false, message: 'Course not found' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user || !user.enrolledCourse.includes(courseId)) {
+            return res.json({ success: false, message: 'User has not purchased this course' });
+        }
+
+        // Check if user already rated
+        const existingRatingIndex = course.courseRatings.findIndex(r => r.userId.toString() === userId);
+        
+        if (existingRatingIndex > -1) {
+            // Update existing rating
+            course.courseRatings[existingRatingIndex].rating = rating;
+        } else {
+            // Add new rating
+            course.courseRatings.push({ userId, rating });
+        }
+
+        await course.save();
+
+        return res.json({ success: true, message: 'Rating Added' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
