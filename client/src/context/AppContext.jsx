@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
 import { useAuth, useUser } from '@clerk/clerk-react'
@@ -18,8 +17,9 @@ export const AppContextProvider = (props) => {
     const { user } = useUser()
 
     const [allCourses, setAllCourses] = useState([])
-    const [isEducator, setIsEducator] = useState(true)
+    const [isEducator, setIsEducator] = useState(false)
     const [enrolledCourses, setEnrolledCourses] = useState([])
+    const [userData, setuserData] = useState(null)
 
     //Fetch All Courses
     const fetchAllCourses = async () => {
@@ -29,6 +29,25 @@ export const AppContextProvider = (props) => {
             if (data.success) {
                 setAllCourses(data.courses)
             } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+    // Fetch UserData
+    const fetchUserData =  async()=> {
+if(user.publicMetadata.role === 'educator') {
+    setIsEducator(true)
+}
+        try {
+            const token = await getToken();
+            const {data} = await axios.get(backendUrl +'api/user/data', {headers: {
+                Authorization: `Bearer ${token}`
+            }})
+            if(data.success){
+                setuserData(data.user)
+            }else{
                 toast.error(data.message)
             }
         } catch (error) {
@@ -75,15 +94,24 @@ export const AppContextProvider = (props) => {
 
     // Fetch user Enrolled Courses
     const fetchUserEnrolledCourses = async () => {
-        setEnrolledCourses(dummyCourses)
-    }
-    const logToken = async () => {
-        console.log(await getToken())
+        try {
+            const token = await getToken();
+            const {data} = await axios.get(backendUrl +'api/user/enrolled-courses', {headers: {
+                Authorization: `Bearer ${token}`
+            }})
+            if(data.success){
+                setEnrolledCourses(data.enrolledCourses.reverse())
+            }else{
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     useEffect(() => {
         if (user) {
-            logToken()
+            fetchUserData()
         }
     }, [user])
     useEffect(() => {
@@ -101,7 +129,9 @@ export const AppContextProvider = (props) => {
         calculateCourseDuration,
         calculateNoOfLectures,
         enrolledCourses,
-        fetchUserEnrolledCourses
+        fetchUserEnrolledCourses,
+        backendUrl,userData, setuserData, getToken,
+        fetchAllCourses
     }
     return (
         <AppContext.Provider value={value}>
