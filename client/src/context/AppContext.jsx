@@ -3,10 +3,13 @@ import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from "humanize-duration";
 import { useAuth, useUser } from '@clerk/clerk-react'
+import { toast } from 'react-toastify';
+import axios from 'axios'
 
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
     const currency = import.meta.env.VITE_CURRENCY
 
     const navigate = useNavigate()
@@ -20,7 +23,17 @@ export const AppContextProvider = (props) => {
 
     //Fetch All Courses
     const fetchAllCourses = async () => {
-        setAllCourses(dummyCourses)
+        try {
+            const { data } = await axios.get(backendUrl + '/api/course/all');
+
+            if (data.success) {
+                setAllCourses(data.courses)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
     //Fuction to calculate average rating of course
     const calculateRating = (course) => {
@@ -64,15 +77,15 @@ export const AppContextProvider = (props) => {
     const fetchUserEnrolledCourses = async () => {
         setEnrolledCourses(dummyCourses)
     }
-const logToken =  async () => {
-    console.log(await getToken())
-}
-
-useEffect(()=> {
-    if(user) {
-        logToken()
+    const logToken = async () => {
+        console.log(await getToken())
     }
-},[user])
+
+    useEffect(() => {
+        if (user) {
+            logToken()
+        }
+    }, [user])
     useEffect(() => {
         fetchAllCourses()
         fetchUserEnrolledCourses()
