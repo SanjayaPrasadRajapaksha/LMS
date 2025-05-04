@@ -6,27 +6,81 @@ import humanizeDuration from 'humanize-duration'
 import YouTube from 'react-youtube'
 import Footer from '../../components/student/Footer'
 import Rating from '../../components/student/Rating'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Player = () => {
 
   const { courseId } = useParams()
   const [courseData, setCourseData] = useState(null)
-  const { calculateChapterTime, enrolledCourses, } = useContext(AppContext)
+  const { calculateChapterTime, enrolledCourses, backendUrl, getToken, userData, fetchUserEnrolledCourses } = useContext(AppContext)
   const [openSections, setOpenSections] = useState({})
   const [playerData, setPlayerData] = useState(null)
+  const [progressData, setProgressData] = useState(null)
+  const [initialRating, setInitialRating] = useState(0)
 
   const getCourseData = () => {
     enrolledCourses.map((course) => {
       if (course._id === courseId) {
         setCourseData(course)
+        course.courseRating.map((item) => {
+          if (item.userId === userData._id) {
+            setInitialRating(item.rating)
+          }
+        })
       }
     })
   }
 
   useEffect(() => {
-    getCourseData()
+    if (enrolledCourses.length > 0) {
+      getCourseData()
+    }
   }, [enrolledCourses])
+  const markLectureAsCompleted = async (lectureId) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + '/api/user/update-course-progress',
+        { courseId, lectureId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const getCourseProgress = async () => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.post(
+        backendUrl + '/api/user/get-course-progress',
+        { courseId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      if (data.success) {
+        setProgressData(data.progressData)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
   const toggleSection = (index) => {
     setOpenSections((prev) => (
       {
@@ -84,7 +138,7 @@ const Player = () => {
           </div>
           <div className='flex items-center gap-2 py-3 mt-10'>
             <h1 className='text-xl-1 font-bold'>Rate this Course:</h1>
-            <Rating initialRating={0}/>
+            <Rating initialRating={0} />
           </div>
         </div>
 
@@ -102,7 +156,7 @@ const Player = () => {
             <img src={courseData ? courseData.courseThumbnail : ''} alt="" />}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
 
   )
