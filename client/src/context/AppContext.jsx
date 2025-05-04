@@ -36,18 +36,21 @@ export const AppContextProvider = (props) => {
         }
     }
     // Fetch UserData
-    const fetchUserData =  async()=> {
-if(user.publicMetadata.role === 'educator') {
-    setIsEducator(true)
-}
+    const fetchUserData = async () => {
+        if (user.publicMetadata.role === 'educator') {
+            setIsEducator(true)
+        }
         try {
             const token = await getToken();
-            const {data} = await axios.get(backendUrl +'api/user/data', {headers: {
-                Authorization: `Bearer ${token}`
-            }})
-            if(data.success){
+            const { data } = await axios.get(backendUrl + '/api/user/data', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            console.log("user data",data)
+            if (data.success) {
                 setuserData(data.user)
-            }else{
+            } else {
                 toast.error(data.message)
             }
         } catch (error) {
@@ -63,7 +66,7 @@ if(user.publicMetadata.role === 'educator') {
         course.courseRatings.forEach(rating => {
             totalRating += rating.rating
         })
-        return totalRating / course.courseRatings.length
+        return Math.floor(totalRating / course.courseRatings.length)
     }
 
     // Function to calculate course chapter time
@@ -96,12 +99,15 @@ if(user.publicMetadata.role === 'educator') {
     const fetchUserEnrolledCourses = async () => {
         try {
             const token = await getToken();
-            const {data} = await axios.get(backendUrl +'api/user/enrolled-courses', {headers: {
-                Authorization: `Bearer ${token}`
-            }})
-            if(data.success){
+            const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            console.log("enrolled-courses data",data)
+            if (data.success) {
                 setEnrolledCourses(data.enrolledCourses.reverse())
-            }else{
+            } else {
                 toast.error(data.message)
             }
         } catch (error) {
@@ -112,11 +118,12 @@ if(user.publicMetadata.role === 'educator') {
     useEffect(() => {
         if (user) {
             fetchUserData()
+            fetchUserEnrolledCourses()
         }
     }, [user])
+
     useEffect(() => {
         fetchAllCourses()
-        fetchUserEnrolledCourses()
     }, [])
     const value = {
         currency,
@@ -130,7 +137,7 @@ if(user.publicMetadata.role === 'educator') {
         calculateNoOfLectures,
         enrolledCourses,
         fetchUserEnrolledCourses,
-        backendUrl,userData, setuserData, getToken,
+        backendUrl, userData, setuserData, getToken,
         fetchAllCourses
     }
     return (
