@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { dummyStudentEnrolled } from '../../assets/assets'
 import Loading from '../../components/student/Loading'
+import { AppContext } from '../../context/AppContext'
 
 const StudentsEnrolleded = () => {
-
+const { backendUrl, isEducator,getToken } = useContext(AppContext)
   const [enrolledStudents, setEnrolledStudents] = useState(null)
 
   const fetchEnrolledStudents = async () => {
